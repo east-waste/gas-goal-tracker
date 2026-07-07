@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>管理者用ダッシュボード</title>
+  <style>
+    :root {
+      --bg-top: #f7fbff;
+      --bg-mid: #eef7ff;
+      --bg-bottom: #fffaf2;
+      --surface: rgba(255, 255, 255, 0.94);
+      --surface-solid: #ffffff;
+      --text: #314252;
+      --muted: #6f7d8d;
+      --line: rgba(120, 148, 177, 0.18);
+      --primary: #4f88ff;
+      --primary-soft: #edf4ff;
+      --warm: #ffba62;
+      --danger: #dc5d70;
+      --danger-dark: #c5495c;
+      --success: #2eaf6b;
+      --shadow: 0 28px 60px rgba(97, 120, 146, 0.16);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "M PLUS Rounded 1c", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+      background: linear-gradient(160deg, var(--bg-top) 0%, var(--bg-mid) 46%, var(--bg-bottom) 100%);
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    body::before,
+    body::after {
+      content: "";
+      position: fixed;
+      border-radius: 999px;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    body::before {
+      width: 340px;
+      height: 340px;
+      top: -150px;
+      left: -110px;
+      background: rgba(79, 136, 255, 0.1);
+    }
+
+    body::after {
+      width: 360px;
+      height: 360px;
+      right: -160px;
+      bottom: -150px;
+      background: rgba(255, 186, 98, 0.14);
+    }
+
+    .page {
+      position: relative;
+      z-index: 1;
+      width: min(100%, 1320px);
+      margin: 0 auto;
+      padding: 20px 16px 40px;
+    }
+
+    .hero {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 18px;
+      padding: 24px;
+      background: var(--surface);
+      border: 1px solid rgba(255, 255, 255, 0.92);
+      border-radius: 30px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+      margin-bottom: 18px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.94);
+      color: #8d6928;
+      font-weight: 800;
+      font-size: 0.88rem;
+    }
+
+    .hero h1 {
+      margin: 14px 0 10px;
+      font-size: clamp(2rem, 4vw, 2.8rem);
+      line-height: 1.2;
+      color: #2f4053;
+    }
+
+    .hero p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.8;
+      max-width: 700px;
+    }
+
+    .hero-actions {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      min-width: 160px;
+    }
+
+    .logout-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      color: #537193;
+      font-weight: 700;
+      padding: 11px 15px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.72);
+      border: 1px solid rgba(220, 230, 241, 0.9);
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid rgba(255, 255, 255, 0.9);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      padding: 18px 20px;
+      backdrop-filter: blur(10px);
+    }
+
+    .stat-card .label {
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin-bottom: 8px;
+    }
+
+    .stat-card .value {
+      font-size: 1.9rem;
+      font-weight: 800;
+      color: #35506f;
+    }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .stack {
+      display: grid;
+      gap: 18px;
+    }
+
+    .panel {
+      background: var(--surface);
+      border: 1px solid rgba(255, 255, 255, 0.9);
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+      padding: 22px;
+      backdrop-filter: blur(10px);
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+
+    .panel-header h2,
+    .panel-header h3 {
+      margin: 0;
+      color: #304356;
+      font-size: 1.3rem;
+    }
+
+    .panel-header p {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 0.94rem;
+      line-height: 1.6;
+    }
+
+    .chip {
+      padding: 7px 11px;
+      border-radius: 999px;
+      background: var(--primary-soft);
+      color: var(--primary);
+      font-size: 0.8rem;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+    }
+
+    .student-selector {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 18px;
+    }
+
+    label {
+      font-weight: 700;
+      color: #5f748b;
+    }
+
+    select,
+    textarea {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 16px;
+      border: 1.5px solid #d9e5f4;
+      background: #fcfeff;
+      font: inherit;
+      color: var(--text);
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    select:focus,
+    textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 5px rgba(79, 136, 255, 0.12);
+    }
+
+    textarea {
+      min-height: 90px;
+      resize: vertical;
+      line-height: 1.7;
+    }
+
+    .loader {
+      border: 4px solid #eff4fb;
+      border-top: 4px solid var(--primary);
+      border-radius: 50%;
+      width: 28px;
+      height: 28px;
+      animation: spin 1s linear infinite;
+      margin: 16px auto;
+      display: none;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .status-table-wrap {
+      overflow-x: auto;
+      border-radius: 22px;
+      border: 1px solid #e1e9f2;
+      background: #fff;
+    }
+
+    .status-table {
+      width: 100%;
+      min-width: 620px;
+      border-collapse: separate;
+      border-spacing: 0;
+    }
+
+    .status-table th,
+    .status-table td {
+      padding: 14px 12px;
+      text-align: left;
+      vertical-align: top;
+      border-bottom: 1px solid #e9eff5;
+    }
+
+    .status-table th {
+      background: #f6faff;
+      color: #47607a;
+      font-weight: 800;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+
+    .status-table tr:nth-child(even) td {
+      background: #fcfdff;
+    }
+
+    .btn-force-end,
+    .btn-save {
+      border: none;
+      border-radius: 14px;
+      padding: 10px 12px;
+      cursor: pointer;
+      font: inherit;
+      font-weight: 800;
+      color: white;
+      transition: transform 0.2s ease, filter 0.2s ease, opacity 0.2s ease;
+    }
+
+    .btn-force-end {
+      background: linear-gradient(135deg, #ff8e8e, var(--danger));
+      box-shadow: 0 10px 20px rgba(220, 93, 112, 0.18);
+    }
+
+    .btn-force-end:hover {
+      filter: brightness(1.03);
+      transform: translateY(-1px);
+    }
+
+    .btn-force-end:disabled,
+    .btn-save:disabled {
+      opacity: 0.68;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .btn-save {
+      background: linear-gradient(135deg, #5fd38d, var(--success));
+      box-shadow: 0 10px 20px rgba(46, 175, 107, 0.18);
+      display: block;
+      margin-top: 8px;
+      width: 100%;
+    }
+
+    .summary-strip {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .summary-card {
+      padding: 16px;
+      border-radius: 20px;
+      border: 1px solid var(--line);
+      background: var(--surface-solid);
+    }
+
+    .summary-card .caption {
+      color: var(--muted);
+      font-size: 0.85rem;
+      margin-bottom: 6px;
+    }
+
+    .summary-card .content {
+      color: #35506f;
+      font-weight: 800;
+      line-height: 1.5;
+    }
+
+    #chart_div_admin {
+      width: 100%;
+      height: 320px;
+      border-radius: 22px;
+      background: linear-gradient(180deg, #fbfdff, #f6fbff);
+      border: 1px solid #e2ecf6;
+      padding: 10px 8px 0;
+      margin-bottom: 16px;
+    }
+
+    #student-message,
+    #status-message,
+    #comment-needed-message,
+    #monthly-overview-message {
+      color: var(--muted);
+      line-height: 1.7;
+      margin: 12px 0 0;
+    }
+
+    .goal-history-table td:nth-child(1) { width: 12%; }
+    .goal-history-table td:nth-child(2) { width: 24%; white-space: pre-wrap; word-wrap: break-word; }
+    .goal-history-table td:nth-child(3) { width: 24%; white-space: pre-wrap; word-wrap: break-word; }
+    .goal-history-table td:nth-child(4) { width: 40%; }
+    .monthly-overview-table td:nth-child(1) { width: 12%; }
+    .monthly-overview-table td:nth-child(2),
+    .monthly-overview-table td:nth-child(3),
+    .monthly-overview-table td:nth-child(6) { text-align: center; }
+    .monthly-overview-table td:nth-child(4),
+    .monthly-overview-table td:nth-child(5) { white-space: pre-wrap; word-wrap: break-word; }
+
+    @media (max-width: 1100px) {
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 820px) {
+      .hero,
+      .stats-grid,
+      .summary-strip {
+        grid-template-columns: 1fr;
+        display: grid;
+      }
+
+      .hero-actions {
+        justify-content: flex-start;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .page {
+        padding: 14px 12px 32px;
+      }
+
+      .hero,
+      .panel,
+      .stat-card {
+        padding: 18px;
+        border-radius: 24px;
+      }
+
+      .student-selector {
+        grid-template-columns: 1fr;
+      }
+
+      .panel-header {
+        flex-direction: column;
+      }
+    }
+  </style>
+  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+</head>
+<body>
+  <div class="page">
+    <div class="hero">
+      <div>
+        <div class="eyebrow">Admin Dashboard</div>
+        <h1>管理者用ダッシュボード</h1>
+      </div>
+      <div class="hero-actions">
+        <a href="<?!= webAppUrl ?>" class="logout-link">ログアウト</a>
+      </div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="label">確認できる情報</div>
+        <div class="value">リアルタイム状況</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">対応タスク</div>
+        <div class="value">コメント・振り返り</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">閲覧単位</div>
+        <div class="value">生徒別・今月</div>
+      </div>
+    </div>
+
+    <div class="dashboard-grid">
+      <div class="stack">
+        <div id="status-container" class="panel">
+          <div class="panel-header">
+            <div>
+              <h2>リアルタイム学習状況</h2>
+            </div>
+            <div class="chip">Live</div>
+          </div>
+          <div id="loader-status" class="loader"></div>
+          <div id="status-table-container"></div>
+          <p id="status-message"></p>
+        </div>
+
+        <div id="student-dashboard" class="panel">
+          <div class="panel-header">
+            <div>
+              <h2>生徒別データ</h2>
+            </div>
+            <div class="chip">Student View</div>
+          </div>
+
+          <div class="student-selector">
+            <label for="student-select">生徒を選択</label>
+            <select id="student-select" onchange="handleStudentSelect()">
+              <option value="">-- 生徒を選んでください --</option>
+            </select>
+          </div>
+
+          <div id="loader-student" class="loader"></div>
+          <p id="student-message"></p>
+
+          <div id="student-data-container" style="display: none;">
+            <div class="summary-strip">
+              <div class="summary-card">
+                <div class="caption">最終活動日</div>
+                <div class="content" id="summary-last-activity"></div>
+              </div>
+              <div class="summary-card">
+                <div class="caption">今月の学習時間</div>
+                <div class="content" id="summary-monthly-total"></div>
+              </div>
+              <div class="summary-card">
+                <div class="caption">総学習時間</div>
+                <div class="content" id="summary-overall-total"></div>
+              </div>
+            </div>
+
+            <div style="margin-bottom: 14px;">
+              <select id="student-month-select" style="width: 100%; max-width: 220px; padding: 10px 12px; border-radius: 14px; border: 1.5px solid #d9e5f4; background: #fcfeff; font: inherit; color: #314252;"></select>
+            </div>
+            <div id="chart_div_admin"></div>
+
+            <div class="panel-header" style="margin-top: 4px;">
+              <div>
+                <h3>目標履歴</h3>
+              </div>
+              <div class="chip">Goal History</div>
+            </div>
+            <div id="goal-history-container"></div>
+
+            <div class="panel-header" style="margin-top: 22px;">
+              <div>
+                <h3>入退室ログ</h3>
+              </div>
+              <div class="chip">Logs</div>
+            </div>
+            <div id="log-table-container"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="stack">
+        <div id="comment-needed-container" class="panel">
+          <div class="panel-header">
+            <div>
+              <h2>コメントが必要な生徒</h2>
+            </div>
+            <div class="chip">Action</div>
+          </div>
+          <div id="loader-comment-needed" class="loader"></div>
+          <div id="comment-needed-table-container"></div>
+          <p id="comment-needed-message"></p>
+        </div>
+
+        <div id="monthly-overview-container" class="panel">
+          <div class="panel-header">
+            <div>
+              <h2>生徒一覧（月次状況）</h2>
+            </div>
+            <div class="chip">Monthly</div>
+          </div>
+          <div id="loader-monthly-overview" class="loader"></div>
+          <div id="monthly-overview-table-container"></div>
+          <p id="monthly-overview-message"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const webAppUrl = "<?!= webAppUrl ?>";
+
+    document.addEventListener("DOMContentLoaded", function() {
+      google.charts.load('current', {'packages':['corechart']});
+      google.charts.setOnLoadCallback(initAdminPage);
+    });
+
+    function initAdminPage() {
+      fetchRealTimeStatus();
+      setInterval(fetchRealTimeStatus, 30000);
+      fetchAllStudents();
+      fetchStudentsNeedingComment();
+      fetchAllStudentsMonthlyOverview();
+    }
+
+    function wrapTable(container, table) {
+      const wrap = document.createElement('div');
+      wrap.className = 'status-table-wrap';
+      wrap.appendChild(table);
+      container.appendChild(wrap);
+    }
+
+    function fetchStudentsNeedingComment() {
+      document.getElementById('loader-comment-needed').style.display = 'block';
+      google.script.run
+        .withSuccessHandler(function(response) {
+          document.getElementById('loader-comment-needed').style.display = 'none';
+          if (response.success) {
+            updateStudentsNeedingCommentTable(response.data, response.targetYear, response.targetMonth);
+          } else {
+            document.getElementById('comment-needed-message').textContent = 'エラー: ' + response.message;
+          }
+        })
+        .withFailureHandler(function(error) {
+          document.getElementById('loader-comment-needed').style.display = 'none';
+          document.getElementById('comment-needed-message').textContent = 'サーバーとの通信に失敗しました: ' + error.message;
+        })
+        .getStudentsNeedingComment();
+    }
+
+    function fetchAllStudentsMonthlyOverview() {
+      document.getElementById('loader-monthly-overview').style.display = 'block';
+
+      google.script.run
+        .withSuccessHandler(function(response) {
+          document.getElementById('loader-monthly-overview').style.display = 'none';
+          if (response.success) {
+            updateAllStudentsMonthlyOverviewTable(
+              response.data,
+              response.currentYear,
+              response.currentMonth,
+              response.lastMonthYear,
+              response.lastMonth
+            );
+          } else {
+            document.getElementById('monthly-overview-message').textContent =
+              'エラー: ' + response.message;
+          }
+        })
+        .withFailureHandler(function(error) {
+          document.getElementById('loader-monthly-overview').style.display = 'none';
+          document.getElementById('monthly-overview-message').textContent =
+            'サーバーとの通信に失敗しました: ' + error.message;
+        })
+        .getAllStudentsMonthlyOverview();
+    }
+
+    function updateAllStudentsMonthlyOverviewTable(data, currentYear, currentMonth, lastMonthYear, lastMonth) {
+      const container = document.getElementById('monthly-overview-table-container');
+      const message = document.getElementById('monthly-overview-message');
+
+      container.innerHTML = '';
+      message.textContent = '';
+
+      if (!data || data.length === 0) {
+        message.textContent = '表示できる生徒データがありません。';
+        return;
+      }
+
+      const table = document.createElement('table');
+      table.className = 'status-table monthly-overview-table';
+
+      const thead = table.createTHead();
+      const headerRow = thead.insertRow();
+      const headers = [
+        '生徒名',
+        `${currentMonth}月学習時間`,
+        `${lastMonth}月学習時間`,
+        `${currentMonth}月の目標`,
+        `${lastMonth}月の振り返り`,
+        'コメント'
+      ];
+
+      headers.forEach(text => {
+        const th = document.createElement('th');
+        th.textContent = text;
+        headerRow.appendChild(th);
+      });
+
+      const tbody = table.createTBody();
+      data.forEach(student => {
+        const row = tbody.insertRow();
+
+        row.insertCell().textContent = student.studentName || '';
+        row.insertCell().textContent = (student.currentMonthStudyTime || 0) + ' 分';
+        row.insertCell().textContent = (student.lastMonthStudyTime || 0) + ' 分';
+        row.insertCell().textContent = student.currentGoal || '未設定';
+        row.insertCell().textContent = student.lastReflection || '未記入';
+        row.insertCell().textContent = student.coachCommentStatus || '未';
+      });
+
+      wrapTable(container, table);
+    }
+
+    function updateStudentsNeedingCommentTable(data, year, month) {
+      const container = document.getElementById('comment-needed-table-container');
+      const message = document.getElementById('comment-needed-message');
+      container.innerHTML = '';
+      message.textContent = '';
+
+      if (data.length === 0) {
+        message.textContent = `先月 (${year}年${month}月) の振り返りで、コーチコメントが必要な生徒はいません。`;
+        return;
+      }
+
+      const table = document.createElement('table');
+      table.className = 'status-table';
+
+      const thead = table.createTHead();
+      const headerRow = thead.insertRow();
+      const headers = ['生徒名', '年月', '振り返り', '操作'];
+      headers.forEach(text => {
+        const th = document.createElement('th');
+        th.textContent = text;
+        headerRow.appendChild(th);
+      });
+
+      const tbody = table.createTBody();
+      data.forEach(student => {
+        const row = tbody.insertRow();
+        row.insertCell().textContent = student.studentName;
+        row.insertCell().textContent = `${student.year}年${student.month}月`;
+        row.insertCell().textContent = student.reflection;
+
+        const actionCell = row.insertCell();
+        const commentButton = document.createElement('button');
+        commentButton.className = 'btn-save';
+        commentButton.textContent = 'コメントする';
+        commentButton.onclick = function() {
+          const select = document.getElementById('student-select');
+          select.value = student.userId;
+          handleStudentSelect();
+          document.getElementById('goal-history-container').scrollIntoView({ behavior: 'smooth' });
+        };
+        actionCell.appendChild(commentButton);
+      });
+
+      wrapTable(container, table);
+    }
+
+    function fetchRealTimeStatus() {
+      document.getElementById('loader-status').style.display = 'block';
+      google.script.run
+        .withSuccessHandler(function(response) {
+          document.getElementById('loader-status').style.display = 'none';
+          if (response.success) {
+            updateStatusTable(response.data);
+          } else {
+            document.getElementById('status-message').textContent = 'エラー: ' + response.message;
+          }
+        })
+        .withFailureHandler(function(error) {
+          document.getElementById('loader-status').style.display = 'none';
+          document.getElementById('status-message').textContent = 'サーバーとの通信に失敗しました: ' + error.message;
+        })
+        .getRealTimeStatus();
+    }
+
+    function updateStatusTable(data) {
+      const container = document.getElementById('status-table-container');
+      const message = document.getElementById('status-message');
+      container.innerHTML = '';
+      message.textContent = '';
+
+      if (data.length === 0) {
+        message.textContent = '現在、学習中の生徒はいません。';
+        return;
+      }
+
+      const table = document.createElement('table');
+      table.className = 'status-table';
+
+      const thead = table.createTHead();
+      const headerRow = thead.insertRow();
+      const headers = ['生徒名', '学習開始時刻', '現在の学習時間', '操作'];
+      headers.forEach(text => {
+        const th = document.createElement('th');
+        th.textContent = text;
+        headerRow.appendChild(th);
+      });
+
+      const tbody = table.createTBody();
+      data.forEach(student => {
+        const row = tbody.insertRow();
+        row.insertCell().textContent = student.studentName;
+        row.insertCell().textContent = student.startTime;
+        row.insertCell().textContent = student.duration + ' 分';
+
+        const actionCell = row.insertCell();
+        const endButton = document.createElement('button');
+        endButton.className = 'btn-force-end';
+        endButton.textContent = '強制終了';
+        endButton.dataset.userid = student.userId;
+        endButton.dataset.name = student.studentName;
+        endButton.onclick = function() {
+          handleForceEnd(this.dataset.userid, this.dataset.name);
+        };
+        actionCell.appendChild(endButton);
+      });
+
+      wrapTable(container, table);
+    }
+
+    function handleForceEnd(userId, studentName) {
+      if (!confirm(`${studentName}さんの学習を強制的に終了しますか？`)) {
+        return;
+      }
+
+      const buttons = document.querySelectorAll('.btn-force-end');
+      buttons.forEach(btn => btn.disabled = true);
+
+      google.script.run
+        .withSuccessHandler(function(response) {
+          if (response.success) {
+            alert(response.message);
+            fetchRealTimeStatus();
+          } else {
+            alert('エラー: ' + response.message);
+            buttons.forEach(btn => btn.disabled = false);
+          }
+        })
+        .withFailureHandler(function(error) {
+          alert('サーバーとの通信に失敗しました: ' + error.message);
+          buttons.forEach(btn => btn.disabled = false);
+        })
+        .forceEndStudy(userId);
+    }
+
+    function fetchAllStudents() {
+      google.script.run
+        .withSuccessHandler(function(response) {
+          if (response.success) {
+            const select = document.getElementById('student-select');
+            response.data.forEach(student => {
+              const option = document.createElement('option');
+              option.value = student.id;
+              option.textContent = student.name;
+              select.appendChild(option);
+            });
+          } else {
+            document.getElementById('student-message').textContent = '生徒リストの読み込みに失敗しました: ' + response.message;
+          }
+        })
+        .withFailureHandler(function(error) {
+          document.getElementById('student-message').textContent = 'サーバーとの通信に失敗しました: ' + error.message;
+        })
+        .getAllStudents();
+    }
+
+    function handleStudentSelect() {
+      const studentId = document.getElementById('student-select').value;
+      const container = document.getElementById('student-data-container');
+      const messageEl = document.getElementById('student-message');
+
+      messageEl.style.display = 'none';
+      messageEl.textContent = '';
+
+      if (!studentId) {
+        container.style.display = 'none';
+        return;
+      }
+
+      document.getElementById('loader-student').style.display = 'block';
+      container.style.display = 'none';
+
+      google.script.run
+        .withSuccessHandler(function(response) {
+          document.getElementById('loader-student').style.display = 'none';
+          if (response.success) {
+            displayStudentData(response.data);
+          } else {
+            messageEl.textContent = '生徒データの読み込みに失敗しました: ' + response.message;
+            messageEl.style.display = 'block';
+          }
+        })
+        .withFailureHandler(function(error) {
+          document.getElementById('loader-student').style.display = 'none';
+          messageEl.textContent = 'サーバーとの通信に失敗しました: ' + error.message;
+          messageEl.style.display = 'block';
+        })
+        .getStudentData(studentId);
+    }
+
+    function displayStudentData(data) {
+      const container = document.getElementById('student-data-container');
+      const messageEl = document.getElementById('student-message');
+
+      if (!data.summary.isDataFound) {
+        container.style.display = 'none';
+        messageEl.textContent = 'この生徒の学習記録はまだありません。';
+        messageEl.style.display = 'block';
+        return;
+      }
+
+      messageEl.style.display = 'none';
+      container.style.display = 'block';
+
+      document.getElementById('summary-last-activity').textContent = data.summary.lastActivityDate;
+      document.getElementById('summary-monthly-total').textContent = data.summary.monthlyTotal + ' 分';
+      document.getElementById('summary-overall-total').textContent = data.summary.overallTotal + ' 分';
+
+      initStudentDailyChart(data.dailyChartBundle);
+      updateLogTable(data.logs);
+      updateGoalHistoryTable(data.goalHistory);
+    }
+
+    function initStudentDailyChart(bundle) {
+      const select = document.getElementById('student-month-select');
+      const target = document.getElementById('chart_div_admin');
+
+      if (!bundle || !bundle.months || bundle.months.length === 0) {
+        target.innerHTML = '<p style="text-align:center; color:#738397; padding-top: 120px;">データがありません。</p>';
+        select.innerHTML = '';
+        return;
+      }
+
+      select.innerHTML = '';
+      bundle.months.forEach(month => {
+        const option = document.createElement('option');
+        option.value = month.value;
+        option.textContent = month.label;
+        if (month.value === bundle.currentMonth) option.selected = true;
+        select.appendChild(option);
+      });
+
+      select.onchange = function() {
+        drawStudentChart(bundle, this.value);
+      };
+
+      drawStudentChart(bundle, select.value || bundle.currentMonth || bundle.months[0].value);
+    }
+
+    function drawStudentChart(bundle, monthKey) {
+      const rawData = bundle && bundle.dailyByMonth ? bundle.dailyByMonth[monthKey] : null;
+      if (!rawData || rawData.length <= 1) {
+        document.getElementById('chart_div_admin').innerHTML = '<p style="text-align:center; color:#738397; padding-top: 120px;">データがありません。</p>';
+        return;
+      }
+
+      const convertedData = [rawData[0]].concat(rawData.slice(1).map(row => [String(row[0]), row[1]]));
+      const data = google.visualization.arrayToDataTable(convertedData);
+      const selectedOption = document.getElementById('student-month-select').selectedOptions[0];
+      const selectedLabel = selectedOption ? selectedOption.textContent : '';
+      const options = {
+        title: `${selectedLabel}の日別勉強時間 (分)`,
+        titleTextStyle: { fontSize: 16, bold: true, color: '#36506f' },
+        legend: { position: 'none' },
+        backgroundColor: 'transparent',
+        colors: ['#4f88ff'],
+        hAxis: { title: '日', textStyle: { color: '#5f748b' }, titleTextStyle: { color: '#5f748b' } },
+        vAxis: { title: '勉強時間 (分)', minValue: 0, gridlines: { color: '#edf2f7' }, textStyle: { color: '#5f748b' }, titleTextStyle: { color: '#5f748b' } },
+        seriesType: 'bars',
+        chartArea: { left: 58, top: 44, width: '84%', height: '66%' }
+      };
+      const chart = new google.visualization.ComboChart(document.getElementById('chart_div_admin'));
+      chart.draw(data, options);
+    }
+
+    function updateLogTable(logs) {
+      const container = document.getElementById('log-table-container');
+      container.innerHTML = '';
+      if (logs.length === 0) {
+        container.textContent = '入退室の記録はありません。';
+        return;
+      }
+      const table = document.createElement('table');
+      table.className = 'status-table';
+      const thead = table.createTHead();
+      const headerRow = thead.insertRow();
+      ['日時', 'アクション'].forEach(text => {
+        const th = document.createElement('th');
+        th.textContent = text;
+        headerRow.appendChild(th);
+      });
+      const tbody = table.createTBody();
+      logs.forEach(log => {
+        const row = tbody.insertRow();
+        row.insertCell().textContent = log.timestamp;
+        row.insertCell().textContent = log.action;
+      });
+      wrapTable(container, table);
+    }
+
+    function updateGoalHistoryTable(history) {
+      const container = document.getElementById('goal-history-container');
+      container.innerHTML = '';
+      if (!history || history.length === 0) {
+        container.innerHTML = '<p>目標の履歴はありません。</p>';
+        return;
+      }
+
+      const table = document.createElement('table');
+      table.className = 'status-table goal-history-table';
+      table.innerHTML = `<thead><tr><th>年月</th><th>目標</th><th>振り返り</th><th>コーチのコメント</th></tr></thead>`;
+      const tbody = table.createTBody();
+
+      history.forEach(item => {
+        const studentId = document.getElementById('student-select').value;
+        const row = tbody.insertRow();
+        row.innerHTML = `
+          <td>${item.year}年 ${item.month}月</td>
+          <td>${escapeHtml(item.goal)}</td>
+          <td>${escapeHtml(item.reflection)}</td>
+          <td>
+            <textarea id="comment-${studentId}-${item.year}-${item.month}">${escapeHtml(item.comment)}</textarea>
+            <button class="btn-save" onclick="saveComment('${studentId}', ${item.year}, ${item.month})">保存</button>
+          </td>
+        `;
+      });
+      wrapTable(container, table);
+    }
+
+    function saveComment(userId, year, month) {
+      const textarea = document.getElementById(`comment-${userId}-${year}-${month}`);
+      const button = textarea.nextElementSibling;
+      const comment = textarea.value;
+
+      button.disabled = true;
+      button.textContent = '保存中...';
+
+      const data = { userId, year, month, comment };
+
+      google.script.run
+        .withSuccessHandler(response => {
+          if (response.success) {
+            textarea.style.backgroundColor = '#e6f7ee';
+            setTimeout(() => { textarea.style.backgroundColor = ''; }, 2000);
+          } else {
+            alert('保存に失敗しました: ' + response.message);
+            textarea.style.backgroundColor = '#fff1f3';
+          }
+          button.disabled = false;
+          button.textContent = '保存';
+        })
+        .withFailureHandler(error => {
+          alert('エラーが発生しました: ' + error.message);
+          button.disabled = false;
+          button.textContent = '保存';
+        })
+        .saveCoachComment(data);
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str.replace(/[&<>"'`]/g, function(match) {
+        return {
+          '&': '&amp;',
+          '<': '&lt;',
+          '>': '&gt;',
+          '"': '&quot;',
+          "'": '&#39;',
+          '`': '&#x60;'
+        }[match];
+      });
+    }
+
+  </script>
+</body>
+</html>

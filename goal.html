@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>目標設定</title>
+  <style>
+    :root {
+      --bg-top: #fffaf1;
+      --bg-mid: #eef7ff;
+      --bg-bottom: #f5fff8;
+      --surface: rgba(255, 255, 255, 0.92);
+      --surface-strong: #ffffff;
+      --text: #31404d;
+      --muted: #6e7c8c;
+      --line: rgba(121, 152, 182, 0.2);
+      --accent: #4e86ff;
+      --accent-soft: #edf4ff;
+      --warm: #ffb55f;
+      --shadow: 0 24px 60px rgba(83, 112, 146, 0.18);
+      --success: #dff5e9;
+      --danger-bg: #fff1f2;
+      --danger-text: #b33d57;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "M PLUS Rounded 1c", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+      background: linear-gradient(155deg, var(--bg-top) 0%, var(--bg-mid) 48%, var(--bg-bottom) 100%);
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    body::before,
+    body::after {
+      content: "";
+      position: fixed;
+      border-radius: 999px;
+      pointer-events: none;
+      z-index: 0;
+      filter: blur(4px);
+    }
+
+    body::before {
+      width: 260px;
+      height: 260px;
+      top: -90px;
+      right: -40px;
+      background: rgba(255, 192, 118, 0.22);
+    }
+
+    body::after {
+      width: 320px;
+      height: 320px;
+      left: -120px;
+      bottom: -120px;
+      background: rgba(78, 134, 255, 0.14);
+    }
+
+    .page {
+      position: relative;
+      z-index: 1;
+      width: min(100%, 920px);
+      margin: 0 auto;
+      padding: 28px 16px 40px;
+    }
+
+    .hero {
+      padding: 24px 6px 20px;
+      text-align: center;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.72);
+      border: 1px solid rgba(255, 255, 255, 0.85);
+      color: #8f6d2a;
+      font-size: 0.9rem;
+      font-weight: 700;
+      box-shadow: 0 10px 24px rgba(117, 134, 152, 0.08);
+    }
+
+    .hero h1 {
+      margin: 16px 0 10px;
+      font-size: clamp(2rem, 5vw, 2.8rem);
+      line-height: 1.2;
+      color: #2f3e4f;
+    }
+
+    .hero p {
+      margin: 0 auto;
+      max-width: 640px;
+      color: var(--muted);
+      font-size: 1rem;
+      line-height: 1.8;
+    }
+
+    .container {
+      background: var(--surface);
+      border: 1px solid rgba(255, 255, 255, 0.9);
+      border-radius: 30px;
+      padding: 24px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+    }
+
+    .intro-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 16px;
+      margin-bottom: 22px;
+    }
+
+    .intro-card,
+    .tip-card,
+    .section-card {
+      background: var(--surface-strong);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      padding: 20px;
+    }
+
+    .intro-card h2,
+    .section-card h2 {
+      margin: 0 0 8px;
+      font-size: 1.25rem;
+      color: #304356;
+    }
+
+    .intro-card p,
+    .tip-card p,
+    .section-card p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .tip-card {
+      background: linear-gradient(135deg, #fff6df, #fffdf4);
+      border-color: rgba(255, 190, 102, 0.4);
+    }
+
+    .tip-card strong {
+      display: block;
+      margin-bottom: 8px;
+      color: #8d5f15;
+      font-size: 0.98rem;
+    }
+
+    form {
+      display: grid;
+      gap: 18px;
+    }
+
+    .section-card {
+      padding: 24px;
+    }
+
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .section-label {
+      display: inline-block;
+      margin-bottom: 10px;
+      padding: 5px 10px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-size: 0.8rem;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+    }
+
+    .section-note {
+      min-width: 92px;
+      padding: 10px 12px;
+      border-radius: 18px;
+      background: #f8fbff;
+      color: var(--muted);
+      font-size: 0.88rem;
+      text-align: center;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: #526273;
+      font-weight: 700;
+      font-size: 0.96rem;
+    }
+
+    textarea,
+    input[type="text"] {
+      width: 100%;
+      border: 1.5px solid #d9e5f4;
+      border-radius: 18px;
+      padding: 16px 18px;
+      font-size: 1rem;
+      font-family: inherit;
+      color: var(--text);
+      background: #fcfeff;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 140px;
+      line-height: 1.8;
+    }
+
+    textarea:focus,
+    input[type="text"]:focus {
+      outline: none;
+      border-color: rgba(78, 134, 255, 0.7);
+      box-shadow: 0 0 0 5px rgba(78, 134, 255, 0.12);
+      transform: translateY(-1px);
+    }
+
+    .read-only-goal {
+      padding: 16px 18px;
+      border-radius: 18px;
+      background: linear-gradient(135deg, #f7fbff, #fcfdff);
+      border: 1px solid #dde8f4;
+      color: #445567;
+      line-height: 1.8;
+      margin-bottom: 18px;
+      white-space: pre-wrap;
+    }
+
+    .form-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin-top: 4px;
+    }
+
+    button {
+      width: 100%;
+      border: none;
+      border-radius: 18px;
+      padding: 16px 20px;
+      font-size: 1.05rem;
+      font-weight: 800;
+      font-family: inherit;
+      color: white;
+      cursor: pointer;
+      background: linear-gradient(135deg, #ffb85c 0%, #4e86ff 100%);
+      box-shadow: 0 16px 28px rgba(78, 134, 255, 0.24);
+      transition: transform 0.22s ease, box-shadow 0.22s ease, filter 0.22s ease;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 20px 34px rgba(78, 134, 255, 0.28);
+      filter: brightness(1.03);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.72;
+      transform: none;
+      box-shadow: 0 10px 18px rgba(97, 117, 139, 0.12);
+    }
+
+    .loader {
+      border: 4px solid #eff4fb;
+      border-top: 4px solid var(--accent);
+      border-radius: 50%;
+      width: 28px;
+      height: 28px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto;
+      display: none;
+    }
+
+    .message {
+      padding: 14px 16px;
+      border-radius: 16px;
+      display: none;
+      font-weight: 700;
+      line-height: 1.6;
+      text-align: center;
+    }
+
+    .error {
+      background: var(--danger-bg);
+      color: var(--danger-text);
+      border: 1px solid rgba(211, 89, 115, 0.2);
+    }
+
+    .success {
+      background: var(--success);
+      color: #1d7b52;
+      border: 1px solid rgba(29, 123, 82, 0.18);
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 720px) {
+      .page {
+        width: min(100%, 430px);
+        padding: 18px 14px 32px;
+      }
+
+      .container {
+        padding: 18px;
+        border-radius: 24px;
+        max-width: 406px;
+        margin: 0 auto;
+      }
+
+      .intro-grid,
+      .section-head {
+        grid-template-columns: 1fr;
+        display: grid;
+      }
+
+      .section-note {
+        min-width: 0;
+      }
+
+      .hero {
+        padding-top: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="hero">
+      <div class="eyebrow">Monthly Goal Setup</div>
+      <h1>今月の目標</h1>
+    </div>
+
+    <div class="container">
+      <div class="intro-grid">
+        <div class="intro-card">
+          <h2>目標設定のポイント</h2>
+          <p>「何を」「どれくらい」「いつまでに」が伝わると、後で自分でも振り返りやすくなります。少し具体的に書くのがおすすめです。</p>
+        </div>
+        <div class="tip-card">
+          <strong>書き方の例</strong>
+          <p>数学ワークを20ページ進める。英単語を毎日30個復習する。平日は毎日90分以上学習する。</p>
+        </div>
+      </div>
+
+      <form id="goalForm" onsubmit="saveData(); return false;">
+        <div id="lastMonthSection" class="section-card">
+          <div class="section-head">
+            <div>
+              <span class="section-label">Review</span>
+              <h2><?!= lastMonth ?>月の振り返り</h2>
+            </div>
+            <div class="section-note">前月の確認</div>
+          </div>
+
+          <label>先月の目標</label>
+          <div class="read-only-goal" id="lastMonthGoalText"><?!= lastMonthGoal || '（目標はありませんでした）' ?></div>
+
+          <label for="reflection">先月の振り返り</label>
+          <textarea id="reflection" name="reflection" required placeholder="例: 計画より数学は進んだが、英語の復習が足りなかった。次は毎日15分でも英語を続けたい。"></textarea>
+        </div>
+
+        <div class="section-card">
+          <div class="section-head">
+            <div>
+              <span class="section-label">New Goal</span>
+              <h2><?!= currentMonth ?>月の目標</h2>
+            </div>
+            <div class="section-note">今月の計画</div>
+          </div>
+
+          <label for="newGoal">今月の目標</label>
+          <textarea id="newGoal" name="newGoal" required placeholder="例: 数学は学校ワークを2周する。英語は毎日長文1題と単語30個。週の自習時間は合計8時間を目指す。"></textarea>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" id="saveGoalButton" onclick="saveData()">保存してメイン画面へ進む</button>
+          <div id="loader" class="loader"></div>
+          <div id="messageArea" class="message"></div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const webAppUrl = <?= JSON.stringify(webAppUrl) ?>;
+    const userId = <?= JSON.stringify(userId) ?>;
+    const studentName = <?= JSON.stringify(studentName) ?>;
+    const sessionTokenFromTemplate = <?= JSON.stringify(sessionToken) ?>;
+    const lastMonthGoalValue = <?= JSON.stringify(lastMonthGoal || '') ?>;
+    const currentParams = new URLSearchParams(window.location.search);
+    const sessionToken = sessionTokenFromTemplate || currentParams.get("token") || "";
+    const currentYear = Number(<?= currentYear || 0 ?>);
+    const currentMonth = Number(<?= currentMonth || 0 ?>);
+    const lastMonthYear = Number(<?= lastMonthYear || 0 ?>);
+    const lastMonth = Number(<?= lastMonth || 0 ?>);
+
+    if (!lastMonthGoalValue) {
+      document.getElementById('lastMonthSection').style.display = 'none';
+      document.getElementById('reflection').required = false;
+    }
+
+    function saveData() {
+      const newGoal = document.getElementById('newGoal').value;
+      const reflection = document.getElementById('reflection').value;
+      const loader = document.getElementById('loader');
+      const messageArea = document.getElementById('messageArea');
+      const button = document.getElementById('saveGoalButton');
+
+      loader.style.display = 'block';
+      messageArea.style.display = 'none';
+      button.disabled = true;
+
+      const data = {
+        userId: userId,
+        studentName: studentName,
+        sessionToken: sessionToken,
+        currentYear: currentYear,
+        currentMonth: currentMonth,
+        newGoal: newGoal,
+        lastMonthYear: lastMonthYear,
+        lastMonth: lastMonth,
+        reflection: reflection
+      };
+
+      google.script.run
+        .withSuccessHandler(function(response) {
+          if (response.success) {
+            const targetUrl = response.redirectUrl || `${webAppUrl}?page=main&token=${encodeURIComponent(sessionToken)}`;
+            window.top.location.href = targetUrl;
+          } else {
+            showMessage('エラー: ' + response.message, 'error');
+            loader.style.display = 'none';
+            button.disabled = false;
+          }
+        })
+        .withFailureHandler(function(error) {
+          showMessage('エラーが発生しました: ' + error.message, 'error');
+          loader.style.display = 'none';
+          button.disabled = false;
+        })
+        .saveGoalAndReflection(data);
+    }
+
+    function showMessage(msg, type) {
+      const messageArea = document.getElementById('messageArea');
+      messageArea.textContent = msg;
+      messageArea.className = 'message ' + type;
+      messageArea.style.display = 'block';
+    }
+  </script>
+</body>
+</html>
