@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>自習室管理システム（デモ）</title>
+  <style>
+    :root {
+      --bg-top: #fff9f1;
+      --bg-mid: #eef7ff;
+      --bg-bottom: #f2fff8;
+      --surface: rgba(255, 255, 255, 0.94);
+      --surface-solid: #ffffff;
+      --text: #314252;
+      --muted: #6f7e8d;
+      --line: rgba(118, 146, 176, 0.18);
+      --primary: #4f88ff;
+      --primary-soft: #edf4ff;
+      --warm: #ffba62;
+      --success: #27ae60;
+      --danger: #e05b6f;
+      --shadow: 0 28px 60px rgba(97, 120, 146, 0.16);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "M PLUS Rounded 1c", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+      background: linear-gradient(155deg, var(--bg-top) 0%, var(--bg-mid) 48%, var(--bg-bottom) 100%);
+    }
+
+    body {
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    body::before,
+    body::after {
+      content: "";
+      position: fixed;
+      border-radius: 999px;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    body::before {
+      width: 320px;
+      height: 320px;
+      top: -140px;
+      left: -90px;
+      background: rgba(255, 186, 98, 0.18);
+    }
+
+    body::after {
+      width: 360px;
+      height: 360px;
+      right: -160px;
+      bottom: -150px;
+      background: rgba(79, 136, 255, 0.12);
+    }
+
+    .page {
+      position: relative;
+      z-index: 1;
+      width: min(100%, 1180px);
+      margin: 0 auto;
+      padding: 20px 16px 40px;
+    }
+
+    .hero-card {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 18px;
+      padding: 24px;
+      border-radius: 30px;
+      background: var(--surface);
+      border: 1px solid rgba(255, 255, 255, 0.9);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+      margin-bottom: 18px;
+    }
+
+    .hero-main h1 {
+      margin: 10px 0 8px;
+      font-size: clamp(2rem, 4vw, 2.8rem);
+      line-height: 1.2;
+      color: #2f4053;
+    }
+
+    .hero-main .date {
+      margin: 0;
+      color: var(--muted);
+      font-size: 1rem;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.78);
+      border: 1px solid rgba(255, 255, 255, 0.92);
+      color: #8c6929;
+      font-weight: 800;
+      font-size: 0.9rem;
+      box-shadow: 0 10px 22px rgba(111, 127, 146, 0.08);
+    }
+
+    .hero-copy {
+      margin: 10px 0 0;
+      max-width: 520px;
+      color: var(--muted);
+      line-height: 1.8;
+    }
+
+    .hero-side {
+      display: grid;
+      gap: 14px;
+      align-content: start;
+    }
+
+    .metric-card,
+    .rank-card {
+      border-radius: 24px;
+      padding: 18px 20px;
+      background: var(--surface-solid);
+      border: 1px solid var(--line);
+    }
+
+    .metric-label {
+      font-size: 0.9rem;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .metric-value {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      font-weight: 800;
+      color: #34506e;
+    }
+
+    .metric-value strong {
+      font-size: clamp(2rem, 5vw, 2.6rem);
+      line-height: 1;
+      color: var(--primary);
+    }
+
+    .metric-value span {
+      font-size: 1rem;
+    }
+
+    .rank-card {
+      display: none;
+      background: linear-gradient(135deg, #fff6dc, #fffdf5);
+      border-color: rgba(255, 186, 98, 0.4);
+      box-shadow: 0 14px 28px rgba(255, 186, 98, 0.12);
+    }
+
+    #rank-banner > .rank-card {
+      transition: transform 0.22s ease, box-shadow 0.22s ease;
+    }
+
+    #rank-banner > .rank-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 18px 32px rgba(255, 186, 98, 0.18);
+    }
+
+    .surface-card {
+      background: var(--surface);
+      border: 1px solid rgba(255, 255, 255, 0.9);
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+      padding: 22px;
+      backdrop-filter: blur(10px);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+
+    .card-header h2 {
+      margin: 0;
+      font-size: 1.35rem;
+      color: #304356;
+    }
+
+    .card-header p {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 0.94rem;
+    }
+
+    .section-chip {
+      padding: 7px 11px;
+      border-radius: 999px;
+      background: var(--primary-soft);
+      color: var(--primary);
+      font-size: 0.8rem;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+    }
+
+    #chart_div {
+      width: 100%;
+      height: 280px;
+      border-radius: 22px;
+      background: linear-gradient(180deg, #fbfdff, #f6fbff);
+      border: 1px solid #e2ecf6;
+      padding: 10px 8px 0;
+    }
+
+    .buttons-container {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 18px;
+    }
+
+    .action-button {
+      border: none;
+      border-radius: 20px;
+      font-size: 1.08rem;
+      padding: 16px 18px;
+      color: white;
+      cursor: pointer;
+      font-family: inherit;
+      font-weight: 800;
+      transition: transform 0.22s ease, box-shadow 0.22s ease, filter 0.22s ease;
+    }
+
+    .action-button.start {
+      background: linear-gradient(135deg, #5fd38d, #27ae60);
+      box-shadow: 0 16px 28px rgba(39, 174, 96, 0.24);
+    }
+
+    .action-button.end {
+      background: linear-gradient(135deg, #ff8e8e, var(--danger));
+      box-shadow: 0 16px 28px rgba(224, 91, 111, 0.22);
+    }
+
+    .action-button.start.learning {
+      background: linear-gradient(135deg, #1b9f61, #157347);
+      box-shadow: 0 18px 30px rgba(21, 115, 71, 0.26);
+    }
+
+    .action-button:hover {
+      transform: translateY(-2px);
+      filter: brightness(1.03);
+    }
+
+    .action-button:active {
+      transform: translateY(0);
+    }
+
+    .message {
+      margin-top: 14px;
+      padding: 12px 14px;
+      border-radius: 16px;
+      display: none;
+      font-size: 0.96rem;
+      font-weight: 700;
+      line-height: 1.6;
+    }
+
+    .message.success {
+      background-color: #e6f7ee;
+      color: #19714a;
+      border: 1px solid rgba(25, 113, 74, 0.16);
+    }
+
+    .message.error {
+      background-color: #fff1f3;
+      color: #b23c56;
+      border: 1px solid rgba(178, 60, 86, 0.16);
+    }
+
+    .goal-stack {
+      display: grid;
+      gap: 14px;
+    }
+
+    .goal-box {
+      background: var(--surface-solid);
+      border: 1px solid #dce8f3;
+      border-radius: 22px;
+      padding: 18px;
+      transition: transform 0.22s ease, box-shadow 0.22s ease;
+    }
+
+    .goal-box:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 26px rgba(97, 120, 146, 0.12);
+    }
+
+    .goal-box.last-month {
+      background: linear-gradient(135deg, #fbfdff, #f8fafc);
+    }
+
+    .goal-box p {
+      margin: 6px 0;
+    }
+
+    .goal-box .comment {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px dashed #d7e1ec;
+      color: #b23c56;
+    }
+
+    .history-wrap {
+      overflow-x: auto;
+      border-radius: 22px;
+      border: 1px solid #e1e9f2;
+      background: #ffffff;
+    }
+
+    table {
+      border-collapse: separate;
+      border-spacing: 0;
+      width: 100%;
+      min-width: 560px;
+    }
+
+    th, td {
+      padding: 14px 12px;
+      text-align: center;
+      font-size: 0.95rem;
+      border-bottom: 1px solid #e9eff5;
+    }
+
+    th {
+      background: #f6faff;
+      color: #47607a;
+      font-weight: 800;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+
+    tr:nth-child(even) td {
+      background: #fcfdff;
+    }
+
+    .logout-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 18px;
+      margin-left: auto;
+      margin-right: auto;
+      text-decoration: none;
+      color: #537193;
+      font-weight: 700;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.72);
+      border: 1px solid rgba(220, 230, 241, 0.9);
+    }
+
+    @media (max-width: 640px) {
+      .page {
+        width: min(100%, 430px);
+        padding: 14px 12px 32px;
+      }
+
+      .hero-card,
+      .surface-card {
+        padding: 18px;
+        border-radius: 24px;
+      }
+
+      .hero-card,
+      .surface-card,
+      .history-wrap {
+        max-width: 406px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      .buttons-container {
+        grid-template-columns: 1fr;
+      }
+
+      .card-header {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+    }
+
+    /* ===== demo presentation styles ===== */
+    .hero-stat {
+      height: 100%;
+      display: flex; flex-direction: column; justify-content: center; gap: 6px;
+      padding: 20px 22px; border-radius: 24px;
+      background: linear-gradient(150deg, #fff6e6, #edf4ff);
+      border: 1px solid rgba(255,255,255,0.9);
+      box-shadow: 0 14px 30px rgba(111,127,146,0.10);
+    }
+    .hero-stat-label { color: #8c6929; font-weight: 800; font-size: 0.92rem; }
+    .hero-stat-value { color: #2f4053; font-weight: 800; font-size: 2.6rem; line-height: 1; }
+    .hero-stat-value small { font-size: 1rem; font-weight: 700; margin-left: 4px; color: #6f7e8d; }
+    .hero-stat-sub { color: #b6812a; font-weight: 800; font-size: 0.98rem; }
+
+    .chart-title { text-align: center; font-weight: 800; color: #36506f; font-size: 1.05rem; margin: 4px 0 16px; }
+    .chart-empty { text-align: center; color: #738397; padding: 90px 0; }
+    .bar-chart {
+      display: flex; align-items: flex-end; gap: 8px;
+      height: 240px; padding: 6px 4px 0;
+    }
+    .bar-col { flex: 1 1 0; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; min-width: 20px; }
+    .bar-val { font-size: 0.74rem; font-weight: 700; color: #5f748b; margin-bottom: 6px; }
+    .bar-track { width: 100%; max-width: 46px; flex: 1 1 auto; display: flex; align-items: flex-end; }
+    .bar {
+      width: 100%; border-radius: 10px 10px 4px 4px;
+      background: linear-gradient(180deg, #6fa4ff, #4f88ff);
+      box-shadow: 0 6px 14px rgba(79,136,255,0.28);
+      transition: height .6s ease;
+    }
+    .bar-day { font-size: 0.78rem; color: #7e8ea0; margin-top: 8px; font-weight: 600; }
+
+  </style>
+
+  
+  <!-- ===== DEMO MOCK (no GAS backend) ===== -->
+  <script>
+    window.__DEMO__ = { goalData: {"success": true, "data": {"current": {"goal": "数学IAの青チャートを例題全問（1〜3周目）やり切る。英単語ターゲット1900を毎日100語ペースで復習し、模試レベルの長文を週3本読む。平日は2時間、休日は5時間の自習を継続する。", "comment": "先月からの伸びが本当に素晴らしいです！特に数学の演習量が増えたのが数字に出ています。長文はスピードより「根拠を持って選ぶ」ことを意識していきましょう。この調子なら次の模試で偏差値5アップも狙えます💪"}, "last": {"goal": "苦手な数学の基礎固めを最優先。教科書レベルの問題を落とさないようにする。学習習慣をつけるため、まずは毎日机に向かう。", "reflection": "最初は続けられるか不安だったけれど、毎日少しずつでも自習室に来る習慣がついた。数学の基礎問題で解けるものが増えて、自信になった。後半は英語に手が回らなかったのが反省点。", "comment": "毎日欠かさず通えたこと、それ自体が一番の成果です。基礎の土台ができたので、来月は英語も一緒に積み上げていきましょう。振り返りがとても具体的で良いですね！"}}}, dailyLogs: [{"date": "2026-07-07", "start": "17:30", "end": "20:00", "duration": 150}, {"date": "2026-07-06", "start": "17:30", "end": "23:00", "duration": 330}, {"date": "2026-07-05", "start": "17:30", "end": "21:50", "duration": 260}, {"date": "2026-07-04", "start": "17:30", "end": "22:30", "duration": 300}, {"date": "2026-07-03", "start": "17:30", "end": "20:30", "duration": 180}, {"date": "2026-07-02", "start": "17:30", "end": "21:30", "duration": 240}, {"date": "2026-07-01", "start": "17:30", "end": "21:00", "duration": 210}, {"date": "2026-06-30", "start": "17:30", "end": "20:30", "duration": 180}, {"date": "2026-06-29", "start": "17:30", "end": "21:50", "duration": 260}, {"date": "2026-06-28", "start": "17:30", "end": "21:10", "duration": 220}, {"date": "2026-06-27", "start": "17:30", "end": "20:00", "duration": 150}, {"date": "2026-06-26", "start": "17:30", "end": "22:30", "duration": 300}, {"date": "2026-06-25", "start": "17:30", "end": "20:40", "duration": 190}, {"date": "2026-06-24", "start": "17:30", "end": "21:30", "duration": 240}, {"date": "2026-06-23", "start": "17:30", "end": "22:10", "duration": 280}, {"date": "2026-06-22", "start": "17:30", "end": "21:00", "duration": 210}, {"date": "2026-06-20", "start": "17:30", "end": "20:00", "duration": 150}, {"date": "2026-06-19", "start": "17:30", "end": "21:50", "duration": 260}, {"date": "2026-06-18", "start": "17:30", "end": "22:30", "duration": 300}, {"date": "2026-06-17", "start": "17:30", "end": "20:40", "duration": 190}, {"date": "2026-06-16", "start": "17:30", "end": "21:30", "duration": 240}, {"date": "2026-06-15", "start": "17:30", "end": "20:50", "duration": 200}, {"date": "2026-06-13", "start": "17:30", "end": "22:10", "duration": 280}, {"date": "2026-06-12", "start": "17:30", "end": "22:50", "duration": 320}, {"date": "2026-06-11", "start": "17:30", "end": "20:00", "duration": 150}, {"date": "2026-06-10", "start": "17:30", "end": "20:30", "duration": 180}, {"date": "2026-06-09", "start": "17:30", "end": "21:50", "duration": 260}, {"date": "2026-06-08", "start": "17:30", "end": "21:00", "duration": 210}, {"date": "2026-06-06", "start": "17:30", "end": "19:00", "duration": 90}, {"date": "2026-06-05", "start": "17:30", "end": "22:30", "duration": 300}, {"date": "2026-06-04", "start": "17:30", "end": "21:30", "duration": 240}, {"date": "2026-06-03", "start": "17:30", "end": "20:00", "duration": 150}, {"date": "2026-06-02", "start": "17:30", "end": "20:30", "duration": 180}, {"date": "2026-06-01", "start": "17:30", "end": "19:30", "duration": 120}], status: {"success": true, "isLearning": false} };
+    (function(){
+      window.google = window.google || {};
+      const responders = {
+        getGoalData: () => window.__DEMO__.goalData,
+        getDailyLogs: () => ({ success:true, data: window.__DEMO__.dailyLogs }),
+        getCurrentLearningStatus: () => window.__DEMO__.status,
+        recordAction: (userId, name, action) => {
+          const now=new Date(); const hh=String(now.getHours()).padStart(2,'0'); const mm=String(now.getMinutes()).padStart(2,'0');
+          if(action==='\u958b\u59cb') return { success:true, message:'\u81ea\u7fd2\u3092\u958b\u59cb\u3057\u307e\u3057\u305f\uff08\u30c7\u30e2\uff09', startTime: hh+':'+mm };
+          return { success:true, message:'\u81ea\u7fd2\u3092\u7d42\u4e86\u3057\u307e\u3057\u305f\uff08\u30c7\u30e2\uff09', sessionMinutes:90, monthlyTotal:1670 };
+        }
+      };
+      function makeRunner(){
+        let onSuccess=null,onFailure=null;
+        const proxy=new Proxy({},{ get(t,prop){
+          if(prop==='withSuccessHandler') return (fn)=>{onSuccess=fn;return proxy;};
+          if(prop==='withFailureHandler') return (fn)=>{onFailure=fn;return proxy;};
+          return function(...args){ setTimeout(()=>{ try{ const r=responders[prop]?responders[prop](...args):{success:false,message:'(demo) unknown: '+prop}; if(onSuccess)onSuccess(r);}catch(e){ if(onFailure)onFailure(e);} },120); return proxy; };
+        }});
+        return proxy;
+      }
+      Object.defineProperty(window.google,'script',{configurable:true,get(){return {run:makeRunner()};}});
+    })();
+  </script>
+  <!-- ===== /DEMO MOCK ===== -->
+
+  <script id="daily-chart-data" type="application/json">{"currentMonth": "2026-07", "months": [{"value": "2026-07", "label": "2026年7月"}, {"value": "2026-06", "label": "2026年6月"}, {"value": "2026-05", "label": "2026年5月"}], "dailyByMonth": {"2026-07": [["日", "勉強時間"], ["1", 210], ["2", 240], ["3", 180], ["4", 300], ["5", 260], ["6", 330], ["7", 150]], "2026-06": [["日", "勉強時間"], ["1", 120], ["2", 180], ["3", 150], ["4", 240], ["5", 300], ["6", 90], ["8", 210], ["9", 260], ["10", 180], ["11", 150], ["12", 320], ["13", 280], ["15", 200], ["16", 240], ["17", 190], ["18", 300], ["19", 260], ["20", 150], ["22", 210], ["23", 280], ["24", 240], ["25", 190], ["26", 300], ["27", 150], ["28", 220], ["29", 260], ["30", 180]], "2026-05": [["日", "勉強時間"], ["1", 90], ["2", 150], ["3", 120], ["5", 180], ["6", 200], ["7", 160], ["8", 240], ["10", 140], ["11", 180], ["12", 220], ["13", 150], ["14", 190], ["16", 210], ["17", 160], ["18", 180], ["19", 240], ["20", 150], ["22", 120], ["23", 200], ["24", 180], ["25", 160], ["26", 240], ["27", 150], ["28", 190], ["30", 140], ["31", 180]]}}</script>
+  <script>
+    let dailyChartBundle = null;
+    document.addEventListener('DOMContentLoaded', initDailyChart);
+
+    function initDailyChart() {
+      const rawText = document.getElementById('daily-chart-data')?.textContent;
+      dailyChartBundle = rawText ? JSON.parse(rawText) : null;
+      const select = document.getElementById('month-select');
+      if (!dailyChartBundle || !dailyChartBundle.months || dailyChartBundle.months.length === 0) {
+        document.getElementById('chart_div').innerHTML = '<p class="chart-empty">データがありません。</p>';
+        return;
+      }
+      select.innerHTML = '';
+      dailyChartBundle.months.forEach(month => {
+        const option = document.createElement('option');
+        option.value = month.value; option.textContent = month.label;
+        if (month.value === dailyChartBundle.currentMonth) option.selected = true;
+        select.appendChild(option);
+      });
+      select.onchange = function(){ drawDailyChart(dailyChartBundle, this.value); };
+      drawDailyChart(dailyChartBundle, select.value || dailyChartBundle.currentMonth || dailyChartBundle.months[0].value);
+    }
+
+    function drawDailyChart(bundle, monthKey) {
+      const wrap = document.getElementById('chart_div');
+      const rawData = bundle && bundle.dailyByMonth ? bundle.dailyByMonth[monthKey] : null;
+      if (!rawData || rawData.length <= 1) { wrap.innerHTML = '<p class="chart-empty">データがありません。</p>'; return; }
+      const rows = rawData.slice(1).map(r => [String(r[0]), Number(r[1]) || 0]);
+      const max = Math.max.apply(null, rows.map(r => r[1]).concat([1]));
+      const sel = document.getElementById('month-select').selectedOptions[0];
+      const label = sel ? sel.textContent : '';
+      const bars = rows.map(r => {
+        const h = Math.max(2, Math.round(r[1] / max * 100));
+        return '<div class="bar-col"><div class="bar-val">' + r[1] + '</div>' +
+               '<div class="bar-track"><div class="bar" style="height:' + h + '%"></div></div>' +
+               '<div class="bar-day">' + r[0] + '</div></div>';
+      }).join('');
+      wrap.innerHTML = '<div class="chart-title">' + label + 'の日別勉強時間（分）</div>' +
+                       '<div class="bar-chart">' + bars + '</div>';
+    }
+  </script>
+</head>
+<body>
+  <div class="page">
+    <div class="hero-card">
+      <div class="hero-main">
+        <div class="eyebrow">Self Study Dashboard</div>
+        <h1>〇〇 さん、こんにちは！</h1>
+        <p class="date">2026年07月08日（水）</p>
+      </div>
+
+      <div class="hero-side">
+        <div class="hero-stat">
+          <span class="hero-stat-label">今月の学習時間</span>
+          <span class="hero-stat-value">1670<small>分</small></span>
+          <span class="hero-stat-sub">🏆 学年1位 ／ 24人中</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="surface-card" style="margin-top: 18px;">
+      <div class="card-header">
+        <div>
+          <h2>目標</h2>
+        </div>
+        <div class="section-chip">Goals</div>
+      </div>
+      <div id="goal-display-section" class="goal-stack">
+        <div id="goal-loader" style="color:#738397;">読み込み中...</div>
+      </div>
+    </div>
+
+    <div class="surface-card" style="margin-top: 18px;">
+      <div class="card-header">
+        <div>
+          <h2>今月の学習時間</h2>
+        </div>
+        <div class="section-chip">This Month</div>
+      </div>
+
+      <div class="metric-card" style="margin-bottom: 14px;">
+        <div class="metric-value">
+          <strong id="monthlyStudyTimeValue">1670</strong>
+          <span>分</span>
+        </div>
+      </div>
+
+      <div id="rank-banner" data-rank="1" data-total="24" style="margin-bottom: 14px;">
+        <div class="rank-card">
+          <strong id="rank-text" style="font-size:1.08rem; color:#8b6216;"></strong>
+          <div id="rank-subtext" style="font-size:0.92rem; color:#7e6f4c; margin-top:6px; line-height:1.6;"></div>
+        </div>
+      </div>
+
+      <div class="buttons-container">
+        <button id="startBtn" class="action-button start" onclick="recordAction('開始')">自習開始</button>
+        <button class="action-button end" onclick="recordAction('終了')">自習終了</button>
+      </div>
+
+      <div id="messageArea" class="message"></div>
+    </div>
+
+    <div class="surface-card" style="margin-top: 18px;">
+      <div class="card-header">
+        <div>
+          <h2>学習グラフ</h2>
+        </div>
+        <div class="section-chip">Monthly View</div>
+      </div>
+
+      <div style="margin-bottom: 14px;">
+        <select id="month-select" style="width: 100%; max-width: 220px; padding: 10px 12px; border-radius: 14px; border: 1.5px solid #d9e5f4; background: #fcfeff; font: inherit; color: #314252;"></select>
+      </div>
+
+      <div id="chart_div"></div>
+    </div>
+
+    <div class="surface-card" style="margin-top: 18px;">
+      <div class="card-header">
+        <div>
+          <h2>学習日次履歴</h2>
+        </div>
+        <div class="section-chip">Daily Logs</div>
+      </div>
+
+      <div class="history-wrap">
+        <table id="dailyLogTable">
+          <thead>
+            <tr>
+              <th>学習日次</th>
+              <th>開始時刻</th>
+              <th>終了時刻</th>
+              <th>学習時間（分）</th>
+            </tr>
+          </thead>
+          <tbody id="dailyLogBody"><tr><td colspan="5">読み込み中...</td></tr></tbody>
+        </table>
+      </div>
+
+      <a href="#" class="logout-link">ログアウト</a>
+    </div>
+  </div>
+
+  <script>
+    const sessionToken = "demo-token";
+    const sessionExpiresAt = Number(Date.now() + 10*60*60*1000);
+
+    function startSessionExpiryTimer() {
+      const remaining = sessionExpiresAt - Date.now();
+
+      if (remaining <= 0) {
+        alert("ログインから10時間経過したため、再ログインしてください。");
+        window.top.location.href = "#";
+        return;
+      }
+
+      setTimeout(() => {
+        alert("ログインから10時間経過したため、再ログインしてください。");
+        window.top.location.href = "#";
+      }, remaining);
+    }
+  </script>
+
+  <script>
+    const userId = "1001";
+    const studentName = "〇〇";
+    let isCurrentlyLearning = false;
+
+    function formatTimeLabel(date) {
+      return date.toLocaleTimeString('ja-JP', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+      });
+    }
+
+    function formatDateLabel(date) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    }
+
+    function prependDailyLogEntry(dateLabel, startTime, endTime, duration) {
+      const tbody = document.getElementById("dailyLogBody");
+      if (!tbody) return;
+
+      const firstCell = tbody.querySelector("td");
+      if (firstCell && firstCell.textContent.includes("データがありません")) {
+        tbody.innerHTML = "";
+      }
+
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${dateLabel}</td>
+        <td>${startTime || "-"}</td>
+        <td>${endTime || "-"}</td>
+        <td>${duration || 0}</td>`;
+      tbody.prepend(row);
+    }
+
+    function updateCurrentMonthChart(sessionMinutes, endedAt) {
+      if (!dailyChartBundle || !sessionMinutes || !endedAt) return;
+
+      const monthKey = `${endedAt.getFullYear()}-${String(endedAt.getMonth() + 1).padStart(2, "0")}`;
+      const dayLabel = String(endedAt.getDate());
+      const fallbackLabel = `${endedAt.getFullYear()}年${endedAt.getMonth() + 1}月`;
+
+      if (!dailyChartBundle.dailyByMonth) {
+        dailyChartBundle.dailyByMonth = {};
+      }
+
+      if (!dailyChartBundle.dailyByMonth[monthKey]) {
+        dailyChartBundle.dailyByMonth[monthKey] = [["日", "勉強時間"]];
+      }
+
+      let monthExists = dailyChartBundle.months && dailyChartBundle.months.some(month => month.value === monthKey);
+      if (!monthExists) {
+        if (!dailyChartBundle.months) {
+          dailyChartBundle.months = [];
+        }
+        dailyChartBundle.months.unshift({ value: monthKey, label: fallbackLabel });
+      }
+
+      const monthRows = dailyChartBundle.dailyByMonth[monthKey];
+      let updated = false;
+      for (let i = 1; i < monthRows.length; i++) {
+        if (String(monthRows[i][0]) === dayLabel) {
+          monthRows[i][1] = (Number(monthRows[i][1]) || 0) + sessionMinutes;
+          updated = true;
+          break;
+        }
+      }
+
+      if (!updated) {
+        monthRows.push([dayLabel, sessionMinutes]);
+        monthRows.sort((a, b) => Number(a[0]) - Number(b[0]));
+      }
+
+      const select = document.getElementById("month-select");
+      if (select && !Array.from(select.options).some(option => option.value === monthKey)) {
+        const option = document.createElement("option");
+        option.value = monthKey;
+        option.textContent = fallbackLabel;
+        select.prepend(option);
+      }
+
+      const activeMonth = select && select.value ? select.value : dailyChartBundle.currentMonth;
+      if (activeMonth === monthKey) {
+        drawDailyChart(dailyChartBundle, monthKey);
+      }
+    }
+
+    function recordAction(actionType) {
+      const msg = document.getElementById("messageArea");
+      msg.style.display = "none";
+
+      if (actionType === "開始") {
+        if (isCurrentlyLearning) {
+          msg.textContent = "すでに自習中です。";
+          msg.className = "message error";
+          msg.style.display = "block";
+          return;
+        }
+      }
+
+      google.script.run
+        .withSuccessHandler(res => {
+          if (res.success && actionType === "開始") {
+            const startBtn = document.getElementById("startBtn");
+            const startLabel = res.startTime ? `${res.startTime} 開始` : "自習中";
+            if (startBtn) {
+              startBtn.innerText = startLabel;
+              startBtn.style.color = "white";
+              startBtn.classList.add("learning");
+            }
+            isCurrentlyLearning = true;
+          }
+
+          msg.textContent = res.message;
+          msg.className = "message " + (res.success ? "success" : "error");
+          msg.style.display = "block";
+
+          if (res.success && actionType === "開始") {
+            return;
+          }
+
+          if (!res.success && actionType === "開始") {
+            restoreStartButtonState();
+          }
+
+          if (res.success && actionType === "終了") {
+            const startBtn = document.getElementById("startBtn");
+            const startedAt = startBtn && startBtn.classList.contains("learning")
+              ? startBtn.innerText.replace(" 開始", "")
+              : "";
+            const endedAt = new Date();
+            if (startBtn) {
+              startBtn.innerText = "自習開始";
+              startBtn.style.color = "white";
+              startBtn.classList.remove("learning");
+            }
+            isCurrentlyLearning = false;
+            if (typeof res.monthlyTotal === "number") {
+              updateMonthlyStudyTime(res.monthlyTotal);
+            }
+            prependDailyLogEntry(
+              formatDateLabel(endedAt),
+              startedAt,
+              formatTimeLabel(endedAt),
+              res.sessionMinutes || 0
+            );
+            updateCurrentMonthChart(res.sessionMinutes || 0, endedAt);
+            setTimeout(loadDailyLogs, 0);
+          }
+        })
+        .withFailureHandler(err => {
+          msg.textContent = "通信エラー：" + err.message;
+          msg.className = "message error";
+          msg.style.display = "block";
+
+          if (actionType === "開始") {
+            restoreStartButtonState();
+          }
+        })
+        .recordAction(userId, studentName, actionType);
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      startSessionExpiryTimer();
+
+      google.script.run
+        .withSuccessHandler(displayGoalData)
+        .withFailureHandler(() => {
+          document.getElementById("goal-display-section").innerHTML =
+            "<p style='color:#b23c56;'>目標の読み込みに失敗しました。</p>";
+        })
+        .getGoalData(userId);
+
+      restoreStartButtonState();
+    });
+
+    function displayGoalData(res) {
+      const box = document.getElementById("goal-display-section");
+      if (!res.success || !res.data) {
+        box.innerHTML = "<p>目標データがありません。</p>";
+        return;
+      }
+      const { current, last } = res.data;
+      let html = "";
+
+      if (current) {
+        html += `
+          <div class="goal-box">
+            <p style="font-weight:800; margin-bottom:8px; color:#36506f;">今月の目標</p>
+            <div style="background:#f8fbff; padding:12px 14px; border-radius:16px; margin-bottom:10px; line-height:1.7;">
+              ${current.goal || "未設定"}
+            </div>
+            ${
+              current.comment
+                ? `<p style="font-weight:800; margin-top:14px; color:#36506f;">コーチからのコメント</p>
+                  <div style="background:#fff7f8; padding:12px 14px; border-radius:16px; color:#b23c56; border:1px solid #f5d6dd; line-height:1.7;">
+                    ${current.comment}
+                  </div>`
+                : ""
+            }
+          </div>`;
+      }
+
+      if (last) {
+        html += `
+          <div class="goal-box last-month">
+            <p style="font-weight:800; margin-bottom:8px; color:#36506f;">先月の目標</p>
+            <div style="background:#f8fbff; padding:12px 14px; border-radius:16px; margin-bottom:10px; line-height:1.7;">
+              ${last.goal || "未設定"}
+            </div>
+            <p style="font-weight:800; margin-top:10px; color:#36506f;">振り返り</p>
+            <div style="background:#f8fbff; padding:12px 14px; border-radius:16px; margin-bottom:10px; line-height:1.7;">
+              ${last.reflection || "未記入"}
+            </div>
+            ${
+              last.comment
+                ? `<p style="font-weight:800; margin-top:10px; color:#36506f;">コーチからのコメント</p>
+                  <div style="background:#fff7f8; padding:12px 14px; border-radius:16px; color:#b23c56; border:1px solid #f5d6dd; line-height:1.7;">
+                    ${last.comment}
+                  </div>`
+                : ""
+            }
+          </div>`;
+      }
+
+      box.innerHTML = html || "<p>目標データが見つかりません。</p>";
+    }
+
+    function loadDailyLogs() {
+      google.script.run
+        .withSuccessHandler(res => {
+          const tbody = document.getElementById("dailyLogBody");
+          tbody.innerHTML = "";
+          if (!res.success || !res.data.length) {
+            tbody.innerHTML = `<tr><td colspan="5">データがありません</td></tr>`;
+            return;
+          }
+          res.data.forEach(r => {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+              <td>${r.date}</td>
+              <td>${r.start || "-"}</td>
+              <td>${r.end || "-"}</td>
+              <td>${r.duration || 0}</td>`;
+            tbody.appendChild(row);
+          });
+        })
+        .withFailureHandler(err => {
+          document.getElementById("dailyLogBody").innerHTML =
+            `<tr><td colspan="5" style="color:#b23c56;">読み込み失敗: ${err.message}</td></tr>`;
+        })
+        .getDailyLogs(userId);
+    }
+
+    function restoreStartButtonState() {
+      google.script.run
+        .withSuccessHandler(res => {
+          const startBtn = document.getElementById("startBtn");
+          if (!startBtn) return;
+
+          if (res.success && res.isLearning && res.startTime) {
+            startBtn.innerText = res.startTime + " 開始";
+            startBtn.style.color = "white";
+            startBtn.classList.add("learning");
+            isCurrentlyLearning = true;
+          } else {
+            startBtn.innerText = "自習開始";
+            startBtn.style.color = "white";
+            startBtn.classList.remove("learning");
+            isCurrentlyLearning = false;
+          }
+        })
+        .withFailureHandler(() => {
+          const startBtn = document.getElementById("startBtn");
+          if (!startBtn) return;
+          startBtn.innerText = "自習開始";
+          startBtn.style.color = "white";
+          startBtn.classList.remove("learning");
+          isCurrentlyLearning = false;
+        })
+        .getCurrentLearningStatus(userId);
+    }
+
+    function updateMonthlyStudyTime(minutes) {
+      const monthlyValue = document.getElementById("monthlyStudyTimeValue");
+      if (monthlyValue) {
+        monthlyValue.textContent = String(minutes);
+      }
+    }
+
+    window.addEventListener("load", loadDailyLogs);
+
+    (function showRankBanner() {
+      try {
+        const banner = document.getElementById('rank-banner');
+        if (!banner) return;
+
+        const monthlyVal = parseInt("1670", 10);
+        if (!monthlyVal || isNaN(monthlyVal)) return;
+
+        const rawRank = banner.getAttribute('data-rank');
+        const rawTotal = banner.getAttribute('data-total');
+        if (!rawRank) return;
+
+        const rankNum = parseInt(rawRank, 10);
+        const totalNum = rawTotal ? parseInt(rawTotal, 10) : null;
+        if (!rankNum || rankNum > 10) return;
+
+        const rankCard = banner.querySelector('.rank-card');
+        const rankText = document.getElementById('rank-text');
+        const rankSub = document.getElementById('rank-subtext');
+
+        if (rankNum === 1) rankText.textContent = `🏆 おめでとうございます！今月はトップです！`;
+        else if (rankNum === 2) rankText.textContent = `🥈 素晴らしいです！今月は2位です！`;
+        else if (rankNum === 3) rankText.textContent = `🥉 おめでとう！今月は3位です！`;
+        else rankText.textContent = `✨ 今月は ${rankNum} 位 です！`;
+
+        if (totalNum) {
+          rankSub.textContent = `全 ${totalNum} 人中の順位です。継続して頑張りましょう！`;
+        }
+
+        rankCard.style.display = 'block';
+      } catch (e) {
+        console.error('Error displaying rank banner:', e);
+      }
+    })();
+
+  </script>
+</body>
+</html>
